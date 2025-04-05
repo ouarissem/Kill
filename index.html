@@ -788,137 +788,127 @@
         });
       }
       
-      // Create and animate a thief
-      function createThief() {
-        if (!gameActive) return;
-        
-        // Create thief element
-        const thief = document.createElement('div');
-        thief.className = 'thief';
-        
-        // Create the silhouette
-        const silhouette = document.createElement('div');
-        silhouette.className = 'thief-silhouette';
-        
-        // Randomize color
-        const color = thiefColors[Math.floor(Math.random() * thiefColors.length)];
-        silhouette.style.backgroundColor = color;
-        
-        thief.appendChild(silhouette);
-        
-        // Random position
-        const maxX = gameContainer.clientWidth - 70;
-        const maxY = gameContainer.clientHeight - 70;
-        const posX = Math.floor(Math.random() * maxX);
-        const posY = Math.floor(Math.random() * maxY);
-        
-        thief.style.left = `${posX}px`;
-        thief.style.top = `${posY}px`;
-        
-        // Add to game container
-        gameContainer.appendChild(thief);
-        
-        // Play sound
-        playSound('appear');
-        
-        // Add click event
-        thief.addEventListener('click', () => {
-          if (!gameActive) return;
-          
-          // Mark as hit
-          thief.classList.add('hit');
-          
-          // Play hit sound
-          playSound('hit');
-          
-          // Create splat effect
-          createSplat(posX, posY, color);
-          
-          // Increase score
-          score++;
-          scoreElement.textContent = score;
-          scoreElement.classList.add('highlight');
-          setTimeout(() => {
-            scoreElement.classList.remove('highlight');
-          }, 300);
-          
-          // Remove thief after animation
-          setTimeout(() => {
-            thief.remove();
-          }, 400);
-        });
-        
-        // Auto-remove after thiefSpeed milliseconds
-        setTimeout(() => {
-          if (thief.parentNode === gameContainer) {
-            thief.remove();
-            
-            // Variable thief appearance rate based on level
-            const appearanceDelay = thiefSpeed * (0.5 + Math.random() * 0.5);
-            setTimeout(createThief, appearanceDelay);
-          }
-        }, thiefSpeed);
-      }
-      
-      // Create splat effect
-      function createSplat(x, y, color) {
-        const splat = document.createElement('div');
-        splat.className = 'splat';
-        splat.style.left = `${x}px`;
-        splat.style.top = `${y}px`;
-        
-        // SVG splat pattern with randomized shape
-        const rotation = Math.random() * 360;
-        const scale = 0.8 + Math.random() * 0.4;
-        
-        splat.style.backgroundImage = `radial-gradient(circle, ${color} 30%, transparent 70%)`;
-        splat.style.transform = `rotate(${rotation}deg) scale(${scale})`;
-        
-        gameContainer.appendChild(splat);
-        
-        // Remove after animation completes
-        setTimeout(() => {
-          splat.remove();
-        }, 500);
-      }
-      
-      // Start the game
-      function startGame() {
-        if (gameActive) return;
-        
-        // Initialize audio on first interaction
-        initializeAudio();
-        
-        // Reset game state
-        score = 0;
-        timeLeft = 60;
-        gameActive = true;
-        
-        // Update UI
-        scoreElement.textContent = score;
-        timerElement.textContent = timeLeft;
-        startMessage.style.display = 'none';
-        gameContainer.classList.add('active');
-        
-        // Start spawning thieves
-        for (let i = 0; i < currentLevel + 1; i++) {
-          setTimeout(createThief, i * 200);
-        }
-        
-        // Start timer
-        gameInterval = setInterval(() => {
-          timeLeft--;
-          timerElement.textContent = timeLeft;
-          
-          if (timeLeft <= 10) {
-            timerElement.style.color = '#ff6b6b';
-          }
-          
-          if (timeLeft <= 0) {
-            endGame();
-          }
-        }, 1000);
-      }
+// استبدل وظيفة createThief الحالية بهذه الوظيفة المحسنة
+function createThief() {
+  if (!gameActive) return;
+  
+  // Create thief element
+  const thief = document.createElement('div');
+  thief.className = 'thief';
+  
+  // Create the silhouette
+  const silhouette = document.createElement('div');
+  silhouette.className = 'thief-silhouette';
+  
+  // Randomize color
+  const color = thiefColors[Math.floor(Math.random() * thiefColors.length)];
+  silhouette.style.backgroundColor = color;
+  
+  thief.appendChild(silhouette);
+  
+  // Random position
+  const maxX = gameContainer.clientWidth - 70;
+  const maxY = gameContainer.clientHeight - 70;
+  const posX = Math.floor(Math.random() * maxX);
+  const posY = Math.floor(Math.random() * maxY);
+  
+  thief.style.left = `${posX}px`;
+  thief.style.top = `${posY}px`;
+  
+  // Add to game container
+  gameContainer.appendChild(thief);
+  
+  // Play sound
+  playSound('appear');
+  
+  // Add click event
+  thief.addEventListener('click', () => {
+    if (!gameActive) return;
+    
+    // Mark as hit
+    thief.classList.add('hit');
+    
+    // Play hit sound
+    playSound('hit');
+    
+    // Create splat effect
+    createSplat(posX, posY, color);
+    
+    // Increase score
+    score++;
+    scoreElement.textContent = score;
+    scoreElement.classList.add('highlight');
+    setTimeout(() => {
+      scoreElement.classList.remove('highlight');
+    }, 300);
+    
+    // Remove thief after animation
+    setTimeout(() => {
+      thief.remove();
+    }, 400);
+  });
+  
+  // Auto-remove after thiefSpeed milliseconds
+  setTimeout(() => {
+    if (thief.parentNode === gameContainer) {
+      thief.remove();
+    }
+  }, thiefSpeed);
+}
+
+// أضف هذه الوظيفة الجديدة لإدارة ظهور اللصوص بشكل مستمر
+function manageThiefSpawning() {
+  if (!gameActive) return;
+  
+  // إنشاء لص جديد
+  createThief();
+  
+  // تحديد موعد ظهور اللص التالي بناءً على المستوى
+  const spawnDelay = thiefSpeed * (0.3 + Math.random() * 0.3);
+  
+  // جدولة ظهور اللص التالي
+  setTimeout(manageThiefSpawning, spawnDelay);
+}
+
+// تعديل وظيفة startGame لاستخدام نظام الظهور المستمر
+function startGame() {
+  if (gameActive) return;
+  
+  // Initialize audio on first interaction
+  initializeAudio();
+  
+  // Reset game state
+  score = 0;
+  timeLeft = 60;
+  gameActive = true;
+  
+  // Update UI
+  scoreElement.textContent = score;
+  timerElement.textContent = timeLeft;
+  startMessage.style.display = 'none';
+  gameContainer.classList.add('active');
+  
+  // بدء نظام ظهور اللصوص المستمر
+  // إنشاء عدد أولي من اللصوص بناءً على المستوى
+  const initialThieves = currentLevel + 1;
+  for (let i = 0; i < initialThieves; i++) {
+    setTimeout(() => manageThiefSpawning(), i * 200);
+  }
+  
+  // Start timer
+  gameInterval = setInterval(() => {
+    timeLeft--;
+    timerElement.textContent = timeLeft;
+    
+    if (timeLeft <= 10) {
+      timerElement.style.color = '#ff6b6b';
+    }
+    
+    if (timeLeft <= 0) {
+      endGame();
+    }
+  }, 1000);
+}
       
       // End the game
       function endGame() {
