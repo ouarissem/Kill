@@ -1,0 +1,1023 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>لعبة اقتل اللصوص</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700&display=swap');
+    
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Tajawal', Arial, sans-serif;
+    }
+    
+    :root {
+      --primary-color: #6a0dad;
+      --secondary-color: #9932cc;
+      --accent-color: #ff6b6b;
+      --background-color: #1a1a2e;
+      --light-color: #e6e6fa;
+      --dark-color: #0f3460;
+      --success-color: #28c76f;
+      --gold-color: #ffd700;
+    }
+    
+    body {
+      background-color: var(--background-color);
+      background-image: 
+        radial-gradient(circle at 20% 30%, rgba(106, 13, 173, 0.15) 0%, transparent 25%),
+        radial-gradient(circle at 80% 70%, rgba(153, 50, 204, 0.1) 0%, transparent 20%);
+      color: var(--light-color);
+      direction: rtl;
+      text-align: center;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px;
+      overflow-x: hidden;
+    }
+    
+    header {
+      margin-bottom: 30px;
+      animation: fadeInDown 1s ease-out;
+    }
+    
+    h1 {
+      font-size: 3rem;
+      color: var(--gold-color);
+      text-shadow: 0 0 10px rgba(255, 215, 0, 0.5), 2px 2px 5px rgba(0, 0, 0, 0.8);
+      margin-bottom: 15px;
+      letter-spacing: 1px;
+      position: relative;
+      display: inline-block;
+    }
+    
+    h1::after {
+      content: '';
+      position: absolute;
+      bottom: -10px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 80px;
+      height: 3px;
+      background: linear-gradient(90deg, transparent, var(--accent-color), transparent);
+    }
+    
+    header p {
+      font-size: 1.2rem;
+      opacity: 0.9;
+      margin-top: 15px;
+    }
+    
+    .game-info {
+      display: flex;
+      justify-content: space-between;
+      width: 100%;
+      max-width: 600px;
+      background: linear-gradient(135deg, var(--dark-color), rgba(15, 52, 96, 0.7));
+      padding: 20px;
+      border-radius: 15px;
+      margin-bottom: 30px;
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      animation: fadeInUp 1s ease-out;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .game-info::before {
+      content: '';
+      position: absolute;
+      top: -10px;
+      left: -10px;
+      right: -10px;
+      bottom: -10px;
+      background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+      z-index: 0;
+      pointer-events: none;
+    }
+    
+    .game-stat {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      position: relative;
+      z-index: 1;
+      padding: 0 15px;
+    }
+    
+    .game-stat:not(:last-child)::after {
+      content: '';
+      position: absolute;
+      right: -10px;
+      top: 20%;
+      height: 60%;
+      width: 1px;
+      background: linear-gradient(to bottom, transparent, rgba(255, 255, 255, 0.3), transparent);
+    }
+    
+    .stat-label {
+      font-size: 1rem;
+      margin-bottom: 8px;
+      color: rgba(230, 230, 250, 0.7);
+    }
+    
+    .stat-value {
+      font-size: 2rem;
+      font-weight: bold;
+      color: var(--gold-color);
+      text-shadow: 0 0 5px rgba(255, 215, 0, 0.3);
+      transition: all 0.3s;
+    }
+    
+    .stat-value.highlight {
+      animation: pulse 0.5s ease-out;
+    }
+    
+    .game-container {
+      position: relative;
+      width: 100%;
+      max-width: 700px;
+      height: 450px;
+      background: linear-gradient(to bottom, rgba(15, 52, 96, 0.9), rgba(26, 26, 46, 0.95));
+      background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM12 86c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm28-65c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4z' fill='%234a4a6a' fill-opacity='0.2' fill-rule='evenodd'/%3E%3C/svg%3E");
+      border: 2px solid rgba(106, 13, 173, 0.3);
+      border-radius: 20px;
+      overflow: hidden;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4), 
+                  0 0 10px rgba(106, 13, 173, 0.3), 
+                  inset 0 0 30px rgba(0, 0, 0, 0.3);
+      margin-bottom: 30px;
+      animation: fadeIn 1.5s ease-out;
+      backdrop-filter: blur(5px);
+      transition: all 0.3s ease;
+    }
+    
+    .game-container::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.3), transparent);
+    }
+    
+    .game-container::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.2), transparent);
+    }
+    
+    .game-container.active {
+      border-color: rgba(106, 13, 173, 0.6);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4), 
+                  0 0 20px rgba(106, 13, 173, 0.5), 
+                  inset 0 0 30px rgba(0, 0, 0, 0.3);
+    }
+    
+    .thief {
+      position: absolute;
+      width: 70px;
+      height: 70px;
+      cursor: pointer;
+      transition: transform 0.1s, filter 0.3s;
+      z-index: 2;
+      filter: drop-shadow(0 0 5px rgba(0, 0, 0, 0.7));
+    }
+    
+    .thief:hover {
+      transform: scale(1.05);
+    }
+    
+    .thief.hit {
+      transform: scale(1.2) rotate(10deg);
+      opacity: 0;
+      transition: all 0.4s ease-out;
+      filter: brightness(1.5);
+    }
+    
+    .thief-silhouette {
+      width: 100%;
+      height: 100%;
+      background-color: #000;
+      mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpath d='M50 5c-6 0-11 5-11 11 0 4 2 7.5 5 9l-4 17h20l-4-17c3-1.5 5-5 5-9 0-6-5-11-11-11zm-12 39v10l3 3v10l-3 2v7h24v-7l-3-2v-10l3-3v-10H38z' fill='%23000'/%3E%3Cpath d='M36 22c-1 .5-2 1-3 2-2 2-3 4-4 7-1 2-1 5-1 7 0 2.3.7 5.3 2 7.7.3.5.6 1 1 1.3h10v-3s-3-1-3-6c0-2 1-3 2-3s2 1 2 3c0 1.2-.3 2.3-1 3h1v-3s1.5-.3 1.5-3.5c0-1.6-.5-2.5-1.5-2.5s-1.5 1-1.5 2.4c0 .6.2 1 .5 1.6v-1c0-1 .5-1.5 1-1.5s1 .5 1 1.5-1 1.5-1 1.5h2c0-1 .5-1.5 1-1.5s1 .5 1 1.5-1 1.5-1 1.5h2c0-1 .5-1.5 1-1.5s1 .5 1 1.5-1 1.5-1 1.5h1v-3s1.5-.3 1.5-3.5c0-1.6-.5-2.5-1.5-2.5s-1.5 1-1.5 2.4c0 .6.2 1 .5 1.6v-1c0-1 .5-1.5 1-1.5s1 .5 1 1.5-1 1.5-1 1.5h2c0-1 .5-1.5 1-1.5s1 .5 1 1.5c0 .8-.6 1.3-1 1.5h2c2-2.4 3-5.4 3-7.7 0-2-0-5-1-7-1-3-2-5-4-7-1-1-2-1.5-3-2h-6.1z' fill='%23000'/%3E%3C/svg%3E");
+      mask-size: contain;
+      mask-repeat: no-repeat;
+      mask-position: center;
+      transition: all 0.2s;
+      border-radius: 50%;
+      position: relative;
+    }
+    
+    .thief-silhouette::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: radial-gradient(circle at center, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0) 70%);
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+    
+    .thief:hover .thief-silhouette::after {
+      opacity: 1;
+    }
+    
+    .controls {
+      display: flex;
+      gap: 20px;
+      margin-top: 20px;
+      animation: fadeInUp 1s ease-out 0.5s backwards;
+    }
+    
+    button {
+      background: linear-gradient(to bottom, var(--accent-color), #e05555);
+      color: white;
+      border: none;
+      padding: 12px 30px;
+      border-radius: 50px;
+      font-size: 1.1rem;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.3s;
+      box-shadow: 0 4px 15px rgba(255, 107, 107, 0.4), 0 2px 5px rgba(0, 0, 0, 0.2);
+      position: relative;
+      overflow: hidden;
+      letter-spacing: 1px;
+    }
+    
+    button::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+      transition: all 0.6s;
+    }
+    
+    button:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 7px 20px rgba(255, 107, 107, 0.5), 0 3px 8px rgba(0, 0, 0, 0.3);
+    }
+    
+    button:active {
+      transform: translateY(1px);
+      box-shadow: 0 2px 10px rgba(255, 107, 107, 0.4), 0 1px 3px rgba(0, 0, 0, 0.2);
+    }
+    
+    button:hover::before {
+      left: 100%;
+    }
+    
+    button#start-btn {
+      background: linear-gradient(to bottom, var(--success-color), #1faa5c);
+      box-shadow: 0 4px 15px rgba(40, 199, 111, 0.4), 0 2px 5px rgba(0, 0, 0, 0.2);
+    }
+    
+    button#start-btn:hover {
+      box-shadow: 0 7px 20px rgba(40, 199, 111, 0.5), 0 3px 8px rgba(0, 0, 0, 0.3);
+    }
+    
+    .levels {
+      margin-bottom: 20px;
+      display: flex;
+      justify-content: center;
+      animation: fadeIn 1s ease-out 0.3s backwards;
+    }
+    
+    .level-btn {
+      background: linear-gradient(to bottom, var(--primary-color), var(--secondary-color));
+      margin: 0 10px;
+      padding: 10px 25px;
+      box-shadow: 0 4px 15px rgba(106, 13, 173, 0.4), 0 2px 5px rgba(0, 0, 0, 0.2);
+      font-size: 1rem;
+      border-radius: 50px;
+      position: relative;
+      transition: all 0.3s;
+    }
+    
+    .level-btn.active {
+      background: linear-gradient(to bottom, var(--gold-color), #e6bb00);
+      color: var(--dark-color);
+      box-shadow: 0 4px 15px rgba(255, 215, 0, 0.5), 0 2px 5px rgba(0, 0, 0, 0.2);
+      transform: scale(1.05);
+    }
+    
+    .level-btn:hover {
+      transform: translateY(-2px);
+    }
+    
+    .level-btn.active:hover {
+      transform: scale(1.05) translateY(-2px);
+    }
+    
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.85);
+      z-index: 100;
+      justify-content: center;
+      align-items: center;
+      backdrop-filter: blur(5px);
+      animation: fadeIn 0.5s ease-out;
+    }
+    
+    .modal-content {
+      background: linear-gradient(135deg, var(--primary-color), var(--dark-color));
+      border-radius: 20px;
+      padding: 40px;
+      text-align: center;
+      max-width: 450px;
+      width: 90%;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+      border: 2px solid rgba(255, 255, 255, 0.1);
+      position: relative;
+      overflow: hidden;
+      animation: scaleIn 0.5s ease-out;
+    }
+    
+    .modal-content::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle at center, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 60%);
+      opacity: 0.5;
+      transform: rotate(30deg);
+      pointer-events: none;
+    }
+    
+    .modal h2 {
+      color: var(--gold-color);
+      margin-bottom: 30px;
+      font-size: 2.5rem;
+      text-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
+      position: relative;
+      display: inline-block;
+    }
+    
+    .modal h2::after {
+      content: '';
+      position: absolute;
+      bottom: -10px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 60px;
+      height: 3px;
+      background: linear-gradient(90deg, transparent, var(--accent-color), transparent);
+    }
+    
+    .modal p {
+      margin-bottom: 20px;
+      font-size: 1.3rem;
+      color: rgba(230, 230, 250, 0.9);
+    }
+    
+    .score-highlight {
+      font-size: 3.5rem;
+      color: var(--gold-color);
+      font-weight: bold;
+      display: block;
+      margin: 20px 0;
+      text-shadow: 0 0 15px rgba(255, 215, 0, 0.5);
+      animation: pulse 2s infinite;
+    }
+    
+    .splat {
+      position: absolute;
+      pointer-events: none;
+      width: 80px;
+      height: 80px;
+      z-index: 3;
+      opacity: 0.9;
+      animation: splatter 0.5s forwards;
+    }
+    
+    /* Game start message */
+    .start-message {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: rgba(0, 0, 0, 0.7);
+      padding: 30px;
+      border-radius: 15px;
+      z-index: 5;
+      max-width: 350px;
+      width: 90%;
+      text-align: center;
+      box-shadow: 0 5px 30px rgba(0, 0, 0, 0.3);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      animation: pulse 2s infinite alternate;
+    }
+    
+    .start-message h3 {
+      font-size: 1.8rem;
+      color: var(--gold-color);
+      margin-bottom: 15px;
+    }
+    
+    .start-message p {
+      font-size: 1.1rem;
+      margin-bottom: 20px;
+    }
+    
+    /* High score table */
+    .high-scores {
+      margin-top: 10px;
+      width: 100%;
+      max-width: 400px;
+      background: rgba(15, 52, 96, 0.5);
+      border-radius: 10px;
+      padding: 10px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+    
+    .high-scores h3 {
+      font-size: 1.3rem;
+      color: var(--gold-color);
+      margin-bottom: 10px;
+    }
+    
+    .high-scores-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    
+    .high-scores-table th,
+    .high-scores-table td {
+      padding: 5px 10px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .high-scores-table th {
+      color: var(--accent-color);
+      font-size: 0.9rem;
+      text-transform: uppercase;
+    }
+    
+    .high-scores-table td {
+      font-size: 1rem;
+    }
+    
+    .high-scores-table tr:last-child td {
+      border-bottom: none;
+    }
+    
+    .high-scores-table .highlight {
+      color: var(--gold-color);
+      font-weight: bold;
+    }
+    
+    /* Animations */
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    
+    @keyframes fadeInUp {
+      from { 
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to { 
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    @keyframes fadeInDown {
+      from { 
+        opacity: 0;
+        transform: translateY(-20px);
+      }
+      to { 
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    @keyframes scaleIn {
+      from { 
+        opacity: 0;
+        transform: scale(0.9);
+      }
+      to { 
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+    
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+      100% { transform: scale(1); }
+    }
+    
+    @keyframes splatter {
+      0% { 
+        transform: scale(0.5) rotate(0deg); 
+        opacity: 1;
+      }
+      100% { 
+        transform: scale(1.2) rotate(15deg); 
+        opacity: 0;
+      }
+    }
+    
+    /* Responsive design */
+    @media (max-width: 768px) {
+      h1 {
+        font-size: 2.5rem;
+      }
+      
+      .game-container {
+        height: 400px;
+      }
+      
+      .stat-value {
+        font-size: 1.7rem;
+      }
+      
+      .thief {
+        width: 60px;
+        height: 60px;
+      }
+    }
+    
+    @media (max-width: 540px) {
+      h1 {
+        font-size: 2rem;
+      }
+      
+      .game-container {
+        height: 350px;
+      }
+      
+      .game-info {
+        padding: 15px 10px;
+      }
+      
+      .stat-value {
+        font-size: 1.5rem;
+      }
+      
+      .stat-label {
+        font-size: 0.9rem;
+      }
+      
+      .thief {
+        width: 55px;
+        height: 55px;
+      }
+      
+      .level-btn {
+        padding: 8px 15px;
+        font-size: 0.9rem;
+      }
+      
+      button {
+        padding: 10px 20px;
+        font-size: 1rem;
+      }
+    }
+    
+    @media (max-width: 400px) {
+      .game-container {
+        height: 300px;
+      }
+      
+      .thief {
+        width: 50px;
+        height: 50px;
+      }
+      
+      .controls {
+        gap: 10px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>لعبة اقتل اللصوص</h1>
+    <p>اضغط على اللصوص بسرعة قبل هروبهم!</p>
+  </header>
+  
+  <div class="game-info">
+    <div class="game-stat">
+      <div class="stat-label">النقاط</div>
+      <div class="stat-value" id="score">0</div>
+    </div>
+    <div class="game-stat">
+      <div class="stat-label">الوقت</div>
+      <div class="stat-value" id="timer">60</div>
+    </div>
+    <div class="game-stat">
+      <div class="stat-label">المستوى</div>
+      <div class="stat-value" id="level">1</div>
+    </div>
+  </div>
+  
+  <div class="levels">
+    <button class="level-btn active" data-level="1">سهل</button>
+    <button class="level-btn" data-level="2">متوسط</button>
+    <button class="level-btn" data-level="3">صعب</button>
+  </div>
+  
+  <div class="game-container" id="game-container">
+    <div class="start-message" id="start-message">
+      <h3>مرحباً بك في لعبة اقتل اللصوص!</h3>
+      <p>اضغط على زر "ابدأ اللعبة" للبدء</p>
+    </div>
+  </div>
+  
+  <div class="controls">
+    <button id="start-btn">ابدأ اللعبة</button>
+    <button id="reset-btn">لعبة جديدة</button>
+  </div>
+  
+  <div class="modal" id="game-over-modal">
+    <div class="modal-content">
+      <h2>انتهت اللعبة!</h2>
+      <p>لقد قمت بقتل:</p>
+      <span class="score-highlight" id="final-score">0</span>
+      <p>من اللصوص</p>
+      <div class="high-scores" id="high-scores">
+        <h3>أعلى النقاط</h3>
+        <table class="high-scores-table">
+          <thead>
+            <tr>
+              <th>المركز</th>
+              <th>النقاط</th>
+              <th>المستوى</th>
+            </tr>
+          </thead>
+          <tbody id="high-scores-body">
+            <!-- High scores will be inserted here -->
+          </tbody>
+        </table>
+      </div>
+      <button id="play-again-btn">العب مرة أخرى</button>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      // Game elements
+      const gameContainer = document.getElementById('game-container');
+      const scoreElement = document.getElementById('score');
+      const timerElement = document.getElementById('timer');
+      const levelElement = document.getElementById('level');
+      const startBtn = document.getElementById('start-btn');
+      const resetBtn = document.getElementById('reset-btn');
+      const gameOverModal = document.getElementById('game-over-modal');
+      const finalScoreElement = document.getElementById('final-score');
+      const playAgainBtn = document.getElementById('play-again-btn');
+      const levelButtons = document.querySelectorAll('.level-btn');
+      const startMessage = document.getElementById('start-message');
+      const highScoresBody = document.getElementById('high-scores-body');
+      
+      // Game variables
+      let score = 0;
+      let timeLeft = 60;
+      let gameActive = false;
+      let gameInterval;
+      let thiefAppearInterval;
+      let currentLevel = 1;
+      let thiefSpeed = 2000; // Base speed in ms
+      let thiefColors = ['#e74c3c', '#e67e22', '#f1c40f', '#3498db', '#9b59b6', '#1abc9c', '#d35400'];
+      let highScores = JSON.parse(localStorage.getItem('thiefHunterHighScores')) || [];
+      
+      // Sound effects (using AudioContext)
+      let audioContext;
+      let initialized = false;
+      
+      function initializeAudio() {
+        if (initialized) return;
+        
+        audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        initialized = true;
+      }
+      
+      function playSound(type) {
+        if (!initialized) return;
+        
+        const oscillator = audioContext.createOscillator();
+        const gainNode = audioContext.createGain();
+        
+// Complete the JavaScript section that was cut off
+        oscillator.connect(gainNode);
+        gainNode.connect(audioContext.destination);
+        
+        switch(type) {
+          case 'hit':
+            oscillator.type = 'sine';
+            oscillator.frequency.setValueAtTime(520, audioContext.currentTime);
+            oscillator.frequency.exponentialRampToValueAtTime(200, audioContext.currentTime + 0.2);
+            gainNode.gain.setValueAtTime(0.8, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.2);
+            oscillator.start();
+            oscillator.stop(audioContext.currentTime + 0.2);
+            break;
+          case 'appear':
+            oscillator.type = 'sine';
+            oscillator.frequency.setValueAtTime(300, audioContext.currentTime);
+            oscillator.frequency.exponentialRampToValueAtTime(400, audioContext.currentTime + 0.1);
+            gainNode.gain.setValueAtTime(0.2, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1);
+            oscillator.start();
+            oscillator.stop(audioContext.currentTime + 0.1);
+            break;
+          case 'gameOver':
+            oscillator.type = 'sawtooth';
+            oscillator.frequency.setValueAtTime(300, audioContext.currentTime);
+            oscillator.frequency.exponentialRampToValueAtTime(100, audioContext.currentTime + 0.3);
+            gainNode.gain.setValueAtTime(0.4, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
+            oscillator.start();
+            oscillator.stop(audioContext.currentTime + 0.3);
+            break;
+        }
+      }
+      
+      // Initialize level settings
+      function setLevel(level) {
+        currentLevel = level;
+        levelElement.textContent = level;
+        
+        // Update difficulty based on level
+        switch (level) {
+          case 1: // Easy
+            thiefSpeed = 2000;
+            break;
+          case 2: // Medium
+            thiefSpeed = 1500;
+            break;
+          case 3: // Hard
+            thiefSpeed = 1000;
+            break;
+        }
+        
+        // Update active level button
+        levelButtons.forEach(btn => {
+          btn.classList.remove('active');
+          if (parseInt(btn.dataset.level) === level) {
+            btn.classList.add('active');
+          }
+        });
+      }
+      
+      // Create and animate a thief
+      function createThief() {
+        if (!gameActive) return;
+        
+        // Create thief element
+        const thief = document.createElement('div');
+        thief.className = 'thief';
+        
+        // Create the silhouette
+        const silhouette = document.createElement('div');
+        silhouette.className = 'thief-silhouette';
+        
+        // Randomize color
+        const color = thiefColors[Math.floor(Math.random() * thiefColors.length)];
+        silhouette.style.backgroundColor = color;
+        
+        thief.appendChild(silhouette);
+        
+        // Random position
+        const maxX = gameContainer.clientWidth - 70;
+        const maxY = gameContainer.clientHeight - 70;
+        const posX = Math.floor(Math.random() * maxX);
+        const posY = Math.floor(Math.random() * maxY);
+        
+        thief.style.left = `${posX}px`;
+        thief.style.top = `${posY}px`;
+        
+        // Add to game container
+        gameContainer.appendChild(thief);
+        
+        // Play sound
+        playSound('appear');
+        
+        // Add click event
+        thief.addEventListener('click', () => {
+          if (!gameActive) return;
+          
+          // Mark as hit
+          thief.classList.add('hit');
+          
+          // Play hit sound
+          playSound('hit');
+          
+          // Create splat effect
+          createSplat(posX, posY, color);
+          
+          // Increase score
+          score++;
+          scoreElement.textContent = score;
+          scoreElement.classList.add('highlight');
+          setTimeout(() => {
+            scoreElement.classList.remove('highlight');
+          }, 300);
+          
+          // Remove thief after animation
+          setTimeout(() => {
+            thief.remove();
+          }, 400);
+        });
+        
+        // Auto-remove after thiefSpeed milliseconds
+        setTimeout(() => {
+          if (thief.parentNode === gameContainer) {
+            thief.remove();
+            
+            // Variable thief appearance rate based on level
+            const appearanceDelay = thiefSpeed * (0.5 + Math.random() * 0.5);
+            setTimeout(createThief, appearanceDelay);
+          }
+        }, thiefSpeed);
+      }
+      
+      // Create splat effect
+      function createSplat(x, y, color) {
+        const splat = document.createElement('div');
+        splat.className = 'splat';
+        splat.style.left = `${x}px`;
+        splat.style.top = `${y}px`;
+        
+        // SVG splat pattern with randomized shape
+        const rotation = Math.random() * 360;
+        const scale = 0.8 + Math.random() * 0.4;
+        
+        splat.style.backgroundImage = `radial-gradient(circle, ${color} 30%, transparent 70%)`;
+        splat.style.transform = `rotate(${rotation}deg) scale(${scale})`;
+        
+        gameContainer.appendChild(splat);
+        
+        // Remove after animation completes
+        setTimeout(() => {
+          splat.remove();
+        }, 500);
+      }
+      
+      // Start the game
+      function startGame() {
+        if (gameActive) return;
+        
+        // Initialize audio on first interaction
+        initializeAudio();
+        
+        // Reset game state
+        score = 0;
+        timeLeft = 60;
+        gameActive = true;
+        
+        // Update UI
+        scoreElement.textContent = score;
+        timerElement.textContent = timeLeft;
+        startMessage.style.display = 'none';
+        gameContainer.classList.add('active');
+        
+        // Start spawning thieves
+        for (let i = 0; i < currentLevel + 1; i++) {
+          setTimeout(createThief, i * 200);
+        }
+        
+        // Start timer
+        gameInterval = setInterval(() => {
+          timeLeft--;
+          timerElement.textContent = timeLeft;
+          
+          if (timeLeft <= 10) {
+            timerElement.style.color = '#ff6b6b';
+          }
+          
+          if (timeLeft <= 0) {
+            endGame();
+          }
+        }, 1000);
+      }
+      
+      // End the game
+      function endGame() {
+        gameActive = false;
+        clearInterval(gameInterval);
+        
+        // Play game over sound
+        playSound('gameOver');
+        
+        // Remove all thieves
+        const thieves = document.querySelectorAll('.thief');
+        thieves.forEach(thief => thief.remove());
+        
+        // Update high scores
+        updateHighScores();
+        
+        // Show game over modal
+        finalScoreElement.textContent = score;
+        gameOverModal.style.display = 'flex';
+        gameContainer.classList.remove('active');
+        
+        // Reset timer style
+        timerElement.style.color = '';
+      }
+      
+      // Reset for a new game
+      function resetGame() {
+        endGame();
+        gameOverModal.style.display = 'none';
+        startMessage.style.display = 'block';
+        timeLeft = 60;
+        timerElement.textContent = timeLeft;
+      }
+      
+      // Update high scores
+      function updateHighScores() {
+        // Add current score
+        highScores.push({
+          score: score,
+          level: currentLevel,
+          date: new Date().toISOString()
+        });
+        
+        // Sort and limit to top 5
+        highScores.sort((a, b) => b.score - a.score);
+        highScores = highScores.slice(0, 5);
+        
+        // Save to localStorage
+        localStorage.setItem('thiefHunterHighScores', JSON.stringify(highScores));
+        
+        // Update the display
+        displayHighScores();
+      }
+      
+      // Display high scores
+      function displayHighScores() {
+        highScoresBody.innerHTML = '';
+        
+        highScores.forEach((entry, index) => {
+          const row = document.createElement('tr');
+          
+          // Highlight if it's the current score
+          const isCurrentScore = entry.date === highScores.find(s => s.score === score)?.date;
+          if (isCurrentScore) {
+            row.classList.add('highlight');
+          }
+          
+          row.innerHTML = `
+            <td>${index + 1}</td>
+            <td>${entry.score}</td>
+            <td>${entry.level}</td>
+          `;
+          
+          highScoresBody.appendChild(row);
+        });
+      }
+      
+      // Event listeners
+      startBtn.addEventListener('click', startGame);
+      resetBtn.addEventListener('click', resetGame);
+      playAgainBtn.addEventListener('click', () => {
+        gameOverModal.style.display = 'none';
+        startMessage.style.display = 'block';
+        timeLeft = 60;
+        timerElement.textContent = timeLeft;
+      });
+      
+      levelButtons.forEach(btn => {
+        btn.addEventListener('click', () => {
+          if (!gameActive) {
+            setLevel(parseInt(btn.dataset.level));
+          }
+        });
+      });
+      
+      // Initialize level
+      setLevel(1);
+      displayHighScores();
+    });
+  </script>
+</body>
+</html>
